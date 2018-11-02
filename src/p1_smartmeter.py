@@ -132,13 +132,14 @@ def parse_value(value):
 
 
 def recon():
+    if reconnect_counter > 5:
+        sys.exit(1)
+
     try:
         mqttc.reconnect()
         info_msg('Successfull reconnected to the MQTT server')
     except:
-        warning_msg('Could not reconnect to the MQTT server. Trying again in 10 seconds')
-        time.sleep(10)
-        recon()
+        error_msg('Could not reconnect to the MQTT server')
 
 def on_connect(client, userdata, flags, rc):
     info_msg('Successfull connected to the MQTT server')
@@ -182,7 +183,12 @@ def main():
     mqttc.on_disconnect = on_disconnect
 
     # Connect to the MQTT server
-    mqttc.connect(config['mqtt_host'], port=1883, keepalive=45)
+    try:
+        mqttc.connect(config['mqtt_host'], port=1883, keepalive=45)
+    except Exception as err:
+        error_msg('could not connect to the mqtt host: {}'.format(err))
+
+    info_msg('succesfull connected to the mqtt host {}:{}'.format(config['mqtt_host'], '1883'))
 
     # Open the serial port
     try:
