@@ -105,28 +105,31 @@ def parse_p1_data(mqttc, mqtt_topic_base, obis_dict, line):
                 sendmsg = False
 
         if sendmsg is True:
-            info_msg('mqtt topic: {}, value: {}'.format(topic, value))
+            debug_msg('mqtt topic: {}, value: {}'.format(topic, value))
             publish_message(mqttc, topic, value)
             
 
 def parse_value(value):
-    if re.match(r'^.*\*A$', value):
-        # Amp
-        value = float(re.sub(r'\*A$', '', value))
-    elif re.match(r'^.*\*kW$', value):
-        # kilo Watt
-        value = int(float(re.sub(r'\*kW$', '', value))*1000)
-    elif re.match(r'^.*\*kWh$', value):
-        # kilo Watt hour
-        value = float(re.sub(r'\*kWh$', '', value))
-    elif re.match(r'^.*\*V$', value):
-        # Voltage
-        value = float(re.sub(r'\*V$', '', value))
-    elif re.match(r'^.*\*m3$', value):
-        # m3 (gas)
-        value = float(re.sub(r'\*m3$', '', value))
-    else:
-        debug_msg('no match regex found for ##{}## in function parse_value'.format(value))
+    try:
+        if re.match(r'^.*\*A$', value):
+            # Amp
+            value = float(re.sub(r'\*A$', '', value))
+        elif re.match(r'^.*\*kW$', value):
+            # kilo Watt
+            value = int(float(re.sub(r'\*kW$', '', value))*1000)
+        elif re.match(r'^.*\*kWh$', value):
+            # kilo Watt hour
+            value = float(re.sub(r'\*kWh$', '', value))
+        elif re.match(r'^.*\*V$', value):
+            # Voltage
+            value = float(re.sub(r'\*V$', '', value))
+        elif re.match(r'^.*\*m3$', value):
+            # m3 (gas)
+            value = float(re.sub(r'\*m3$', '', value))
+        else:
+            debug_msg('no match regex found for ##{}## in function parse_value'.format(value))
+    except ValueError as e:
+        warning_msg('got an error while parsing {}: {}'.format(value, e))
 
     return value
 
